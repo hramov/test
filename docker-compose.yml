@@ -17,13 +17,22 @@ services:
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+
   queue:
     image: wurstmeister/kafka
     ports:
-      - "9092"
+      - "9092:9092"
     environment:
       - DOCKER_API_VERSION=1.22
-      - KAFKA_ADVERTISED_HOST_NAME=127.0.0.1
+      - KAFKA_ADVERTISED_HOST_NAME=192.168.0.103
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CREATE_TOPICS="logs"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+  postgres:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin 

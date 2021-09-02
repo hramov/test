@@ -16,14 +16,15 @@ type Cache struct {
 func Connect() *redis.Client {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
-		Password: "redis",
+		Password: "",
 		DB:       0,
 	})
+	log.Println("Redis has been started")
 	return rdb
 }
 
 func (c *Cache) Set(key string, value string) (string, error) {
-	err := c.Client.Set(ctx, key, value, 0).Err()
+	err := c.Client.Set(ctx, key, value, 1).Err()
 	if err != nil {
 		log.Println(err.Error())
 		return "", err

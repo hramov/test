@@ -15,32 +15,42 @@ import (
 )
 
 func IoCInit() error {
-	err := container.NamedSingleton("UserEntity", func() ports.UserEntityPort {
-		var postgres gates.Orm = &database.Gorm{}
-		postgres.Connect()
-		postgres.Migrate()
+	var postgres gates.Orm = &database.Gorm{}
+	postgres.Connect()
+	postgres.Migrate()
+	pgConnection := postgres.GetConnection()
+	chConnection := logger.Connect()
+	redisConnection := cache.Connect()
 
+	kafkaConsumer := queue.CreateConsumer("logs")
+	kafkaProducer := queue.CreateProducer()
+	kafkaChan := make(chan string)
+	kafka := &queue.Queue{
+		Producer: kafkaProducer,
+		Consumer: kafkaConsumer,
+		Messages: kafkaChan,
+	}
+	kafka.SendMessage("logs", "Kafka has been started")
+
+	err := container.NamedSingleton("UserEntity", func() ports.UserEntityPort {
 		return &entity.UserEntity{
 			Provider: &access.UserProvider{
-				DB: postgres.GetConnection(),
+				DB: pgConnection,
 			}}
 	})
 	err = container.NamedSingleton("Logger", func() ports.LoggerPort {
 		return &logger.Logger{
-			DB: logger.Connect(),
+			DB: chConnection,
 		}
 	})
 	err = container.NamedSingleton("Cache", func() ports.CachePort {
 		return &cache.Cache{
-			Client: cache.Connect(),
+			Client: redisConnection,
 		}
 	})
+
 	err = container.NamedSingleton("Queue", func() ports.QueuePort {
-		return &queue.Queue{
-			Producer: queue.CreateProducer(),
-			Consumer: queue.CreateConsumer("logs"),
-			Messages: make(chan string),
-		}
+		return kafka
 	})
 
 	if err != nil {
@@ -53,15 +63,15 @@ func main() {
 	if err := IoCInit(); err != nil {
 		log.Fatal("Cannot use IoC container!")
 	}
-
 	var queue queue.Queue
 	container.NamedResolve(&queue, "Queue")
 
 	var logger logger.Logger
 	container.NamedResolve(&logger, "Logger")
+	logger.Log("Logger has been started")
 
-	go queue.ReceiveMessage()
-	go logger.Log(<-queue.Messages)
+	// go queue.ReceiveMessage()
+	// go logger.Log(<-queue.Messages)
 
 	grpc := grpc.Server{}
 	grpc.Start()

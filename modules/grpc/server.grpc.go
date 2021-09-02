@@ -96,7 +96,7 @@ func (s *Server) DeleteUser(ctx context.Context, in *pb.DeleteRequest) (*pb.Dele
 }
 
 func (s *Server) Start() {
-	log.Println("Server started!")
+	log.Println("Server has beed started")
 	lis, err := net.Listen("tcp", ":5005")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)

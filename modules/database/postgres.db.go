@@ -14,7 +14,7 @@ type Gorm struct{}
 var DB *gorm.DB = nil
 
 func (o *Gorm) Connect() {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s", "localhost", "admin", "admin", "testing", "5432", "disable")
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s", "localhost", "admin", "admin", "postgres", "5432", "disable")
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
