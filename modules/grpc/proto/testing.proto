@@ -1,0 +1,35 @@
+syntax = "proto2";
+
+service Testing {
+  rpc GetUsers (GetRequest) returns (GetReply) {}
+  rpc AddUser (AddRequest) returns (AddReply) {}
+  rpc DeleteUser (DeleteRequest) returns (DeleteReply) {}
+}
+
+message GetRequest {}
+
+message AddRequest {
+  required string email = 1;
+  required string password = 2;
+}
+
+message DeleteRequest {
+  required string id = 1;
+}
+
+message GetSingleReply {
+  required string email = 1;
+  required string password = 2;
+}
+
+message GetReply {
+    repeated GetSingleReply User = 1; 
+}
+
+message AddReply {
+  required string id = 1;
+}
+
+message DeleteReply {
+  required string id = 1;
+}
